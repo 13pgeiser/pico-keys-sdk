@@ -31,6 +31,7 @@
 #define PHY_OPT_WCID    0x1
 #define PHY_OPT_DIMM    0x2
 #define PHY_OPT_DISABLE_POWER_RESET 0x4
+#define PHY_OPT_LED_STEADY 0x8
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -55,14 +56,14 @@ typedef struct phy_data {
     bool usb_product_present;
 } phy_data_t;
 
-#define PHY_OPT_MASK    (PHY_UP_BTN | PHY_OPT_SECURE_LOCK | PHY_OPT_SECURE_BOOT | PHY_OPT_DIMM | PHY_OPT_WCID)
-
-#define PHY_MAX_SIZE    9
+#define PHY_MAX_SIZE    47
 
 #ifndef ENABLE_EMULATION
 extern int phy_serialize_data(const phy_data_t *phy, uint8_t *data, uint16_t *len);
 extern int phy_unserialize_data(const uint8_t *data, uint16_t len, phy_data_t *phy);
 extern int phy_init();
+extern int phy_save();
+extern int phy_load();
 extern phy_data_t phy_data;
 #endif
 

@@ -16,11 +16,6 @@
 #
 
 include(pico-keys-sdk/cmake/version.cmake)
-include(pico-keys-sdk/cmake/boards.cmake)
-
-if(PICO_BOARD)
-  dict(GET led_driver ${PICO_BOARD} LED_DRIVER)
-endif()
 
 option(VIDPID "Set specific VID/PID from a known platform {NitroHSM, NitroFIDO2, NitroStart, NitroPro, Nitro3, Yubikey5, YubikeyNeo, YubiHSM, Gnuk, GnuPG}" "None")
 
@@ -171,14 +166,14 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/src/apdu.c
     ${CMAKE_CURRENT_LIST_DIR}/src/rescue.c
     ${CMAKE_CURRENT_LIST_DIR}/src/led/led.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/led/led_cyw43.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/led/led_pico.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/led/led_pimoroni.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/led/led_ws2812.c
 )
 
 if(ESP_PLATFORM)
-  set(LED_DRIVER led_neopixel)
-endif()
-if (LED_DRIVER)
-    message(STATUS "LED driver:\t\t\t ${LED_DRIVER}")
-    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/src/led/${LED_DRIVER}.c)
+    set(SOURCES ${SOURCES} ${CMAKE_CURRENT_LIST_DIR}/src/led/led_neopixel.c)
 endif()
 
 ## mbedTLS reports an stringop overflow for cmac.c
@@ -240,6 +235,7 @@ function(add_impl_library target)
     string(TOUPPER ${target} TARGET_UPPER)
     target_compile_definitions(${target} INTERFACE LIB_${TARGET_UPPER}=1)
 endfunction()
+
 if(${USB_ITF_HID})
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/src/usb/hid/hid.c
@@ -248,6 +244,9 @@ if(${USB_ITF_HID})
         ${CMAKE_CURRENT_LIST_DIR}/src/usb/hid
     )
 endif()
+
+add_definitions("-fmacro-prefix-map=${CMAKE_CURRENT_LIST_DIR}/=")
+
 if(ENABLE_EMULATION)
     if(APPLE)
         add_definitions("-Wno-deprecated-declarations")
